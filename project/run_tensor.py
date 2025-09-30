@@ -105,11 +105,13 @@ class TensorTrain:
 
 
 if __name__ == "__main__":
-    PTS = 50
-    HIDDEN = 10
+    PTS = 100
+    HIDDEN = 20
     RATE = 0.5
-    EPOCHS = 800
-    data = minitorch.datasets["Xor"](PTS)
+    EPOCHS = 1500
+    data = minitorch.datasets["Spiral"](PTS)
     TensorTrain(HIDDEN).train(data, RATE, max_epochs=EPOCHS)
+
+
 
 
