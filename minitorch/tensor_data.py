@@ -42,9 +42,10 @@ def index_to_position(index: Index, strides: Strides) -> int:
     Returns:
         Position in storage
     """
-
-    # TODO: Implement for Task 2.1.
-    raise NotImplementedError("Need to implement for Task 2.1")
+    pos = 0
+    for i in range(index.shape[0]):
+        pos += int(index[i]) * int(strides[i])
+    return int(pos)
 
 
 def to_index(ordinal: int, shape: Shape, out_index: OutIndex) -> None:
@@ -60,8 +61,12 @@ def to_index(ordinal: int, shape: Shape, out_index: OutIndex) -> None:
         out_index : return index corresponding to position.
 
     """
-    # TODO: Implement for Task 2.1.
-    raise NotImplementedError("Need to implement for Task 2.1")
+    ord = int(ordinal)
+    dims = shape.shape[0]
+    for i in range(dims - 1, -1, -1):
+        s = int(shape[i])
+        out_index[i] = np.int32(ord % s)
+        ord //= s
 
 
 def broadcast_index(
@@ -83,8 +88,16 @@ def broadcast_index(
     Returns:
         None
     """
-    # TODO: Implement for Task 2.2.
-    raise NotImplementedError("Need to implement for Task 2.2")
+    big_dims = big_shape.shape[0]
+    dims = shape.shape[0]
+    offset = big_dims - dims
+    for j in range(dims):
+        sj = int(shape[j])
+        big_ind = j + offset
+        if sj == 1:
+            out_index[j] = np.int32(0)
+        else:
+            out_index[j] = np.int32(big_index[big_ind])
 
 
 def shape_broadcast(shape1: UserShape, shape2: UserShape) -> UserShape:
@@ -101,8 +114,25 @@ def shape_broadcast(shape1: UserShape, shape2: UserShape) -> UserShape:
     Raises:
         IndexingError : if cannot broadcast
     """
-    # TODO: Implement for Task 2.2.
-    raise NotImplementedError("Need to implement for Task 2.2")
+    a = list(shape1)
+    b = list(shape2)
+    if len(a) < len(b):
+        a = [1] * (len(b) - len(a)) + a
+    elif len(b) < len(a):
+        b = [1] * (len(a) - len(b)) + b
+
+    out = [0] * len(a)
+    for i in range(len(a) - 1, -1, -1):
+        x, y = int(a[i]), int(b[i])
+        if x == y:
+            out[i] = x
+        elif x == 1:
+            out[i] = y
+        elif y == 1:
+            out[i] = x
+        else:
+            raise IndexingError(f"Cannot broadcast shapes {tuple(shape1)} and {tuple(shape2)}")
+    return tuple(out)
 
 
 def strides_from_shape(shape: UserShape) -> UserStrides:
@@ -222,8 +252,9 @@ class TensorData:
             range(len(self.shape))
         ), f"Must give a position to each dimension. Shape: {self.shape} Order: {order}"
 
-        # TODO: Implement for Task 2.1.
-        raise NotImplementedError("Need to implement for Task 2.1")
+        new_shape = tuple(self.shape[i] for i in order)
+        new_strides = tuple(self.strides[i] for i in order)
+        return TensorData(self._storage, new_shape, new_strides)
 
     def to_string(self) -> str:
         s = ""
