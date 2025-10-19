@@ -268,7 +268,7 @@ def tensor_map(fn: Callable[[float], float]) -> Any:
         in_shape: Shape,
         in_strides: Strides,
     ) -> None:
-        
+
         out_index = np.empty(out_shape.shape[0], dtype=np.int32)
         in_index = np.empty(in_shape.shape[0], dtype=np.int32)
 
@@ -328,7 +328,7 @@ def tensor_zip(fn: Callable[[float, float], float]) -> Any:
         b_shape: Shape,
         b_strides: Strides,
     ) -> None:
-        
+
         out_index = np.empty(out_shape.shape[0], dtype=np.int32)
         a_index = np.empty(a_shape.shape[0], dtype=np.int32)
         b_index = np.empty(b_shape.shape[0], dtype=np.int32)
@@ -378,13 +378,13 @@ def tensor_reduce(fn: Callable[[float, float], float]) -> Any:
         a_strides: Strides,
         reduce_dim: int,
     ) -> None:
-        
+
         dims = out_shape.shape[0]
         out_index = np.empty(dims, dtype=np.int32)
         a_index = np.empty(a_shape.shape[0], dtype=np.int32)
 
         for ordinal in range(out.size):
-            
+
             to_index(ordinal, out_shape, out_index)
             out_pos = index_to_position(out_index, out_strides)
             acc = out[out_pos]

@@ -36,9 +36,9 @@ class Linear(minitorch.Module):
         self.out_size = out_size
 
     def forward(self, x):
-        
-        W = self.weights.value       
-        b = self.bias.value            
+
+        W = self.weights.value
+        b = self.bias.value
         N = x.shape[0]
         prod = (x.view(N, x.shape[1], 1)) * (W.view(1, W.shape[0], W.shape[1]))
         summed = prod.sum(1)
