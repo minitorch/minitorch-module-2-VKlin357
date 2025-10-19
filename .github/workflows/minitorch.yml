@@ -1,0 +1,47 @@
+name: CI (Module 3)
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.10"]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y graphviz
+          python -m pip install --upgrade pip
+          # базовые dev-зависимости
+          pip install flake8 pytest hypothesis pep8-naming
+          # проектные зависимости (если есть requirements.txt)
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          # поставить сам пакет
+          pip install -e .
+
+      - name: Lint with flake8
+        run: |
+          # если у тебя есть .flake8, flake8 возьмёт правила оттуда
+          flake8 --ignore "N801,E203,E266,E501,W503,W504,F812,F401,F841,E741,N803,N802,N806,E128,E302" minitorch/ tests/ project/
+
+      - name: Test with pytest (Module 3)
+        run: |
+          echo "Module 3"
+          pytest -q -x -m task3_1
+          pytest -q -x -m task3_2
+          pytest -q -x -m task3_3
+          pytest -q -x -m task3_4
