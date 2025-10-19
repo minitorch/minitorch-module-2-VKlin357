@@ -1,4 +1,4 @@
-name: CI (Module 3)
+name: CI (Module 2)
 
 on:
   push:
@@ -38,10 +38,10 @@ jobs:
           # если у тебя есть .flake8, flake8 возьмёт правила оттуда
           flake8 --ignore "N801,E203,E266,E501,W503,W504,F812,F401,F841,E741,N803,N802,N806,E128,E302" minitorch/ tests/ project/
 
-      - name: Test with pytest (Module 3)
+      - name: Test with pytest (Module 2)
         run: |
-          echo "Module 3"
-          pytest -q -x -m task3_1
-          pytest -q -x -m task3_2
-          pytest -q -x -m task3_3
-          pytest -q -x -m task3_4
+          echo "Module 2"
+          pytest -q -x -m task2_1
+          pytest -q -x -m task2_2
+          pytest -q -x -m task2_3
+          pytest -q -x -m task2_4
