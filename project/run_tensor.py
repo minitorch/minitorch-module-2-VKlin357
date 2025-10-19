@@ -111,7 +111,3 @@ if __name__ == "__main__":
     EPOCHS = 1500
     data = minitorch.datasets["Spiral"](PTS)
     TensorTrain(HIDDEN).train(data, RATE, max_epochs=EPOCHS)
-
-
-
-
