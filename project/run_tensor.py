@@ -4,6 +4,7 @@ Be sure you have minitorch installed in you Virtual Env.
 """
 
 import minitorch
+import time
 
 
 def RParam(*shape):
@@ -21,8 +22,10 @@ class Network(minitorch.Module):
         self.layer3 = Linear(hidden_layers, 1)
 
     def forward(self, x):
-        # TODO: Implement for Task 2.5.
-        raise NotImplementedError("Need to implement for Task 2.5")
+        h1 = self.layer1(x).relu()
+        h2 = self.layer2(h1).relu()
+        out = self.layer3(h2).sigmoid()
+        return out
 
 
 class Linear(minitorch.Module):
@@ -33,12 +36,24 @@ class Linear(minitorch.Module):
         self.out_size = out_size
 
     def forward(self, x):
-        # TODO: Implement for Task 2.5.
-        raise NotImplementedError("Need to implement for Task 2.5")
+
+        W = self.weights.value
+        b = self.bias.value
+        N = x.shape[0]
+        prod = (x.view(N, x.shape[1], 1)) * (W.view(1, W.shape[0], W.shape[1]))
+        summed = prod.sum(1)
+        y = summed.view(N, self.out_size)
+
+        return y + b
 
 
-def default_log_fn(epoch, total_loss, correct, losses):
-    print("Epoch ", epoch, " loss ", total_loss, "correct", correct)
+def default_log_fn(epoch, total_loss, correct, losses, epoch_time=None, avg_time=None):
+    msg = f"Epoch {epoch}  loss {total_loss}  correct {correct}"
+    if epoch_time is not None:
+        msg += f"  time {epoch_time*1000:.1f} ms"
+    if avg_time is not None:
+        msg += f"  avg {avg_time*1000:.1f} ms"
+    print(msg)
 
 
 class TensorTrain:
@@ -61,35 +76,38 @@ class TensorTrain:
 
         X = minitorch.tensor(data.X)
         y = minitorch.tensor(data.y)
-
+        epoch_times = []
         losses = []
         for epoch in range(1, self.max_epochs + 1):
+            t0 = time.perf_counter()
+
             total_loss = 0.0
             correct = 0
             optim.zero_grad()
 
-            # Forward
             out = self.model.forward(X).view(data.N)
             prob = (out * y) + (out - 1.0) * (y - 1.0)
-
             loss = -prob.log()
             (loss / data.N).sum().view(1).backward()
             total_loss = loss.sum().view(1)[0]
             losses.append(total_loss)
 
-            # Update
             optim.step()
 
-            # Logging
-            if epoch % 10 == 0 or epoch == max_epochs:
+            dt = time.perf_counter() - t0
+            epoch_times.append(dt)
+
+            if epoch % 10 == 0 or epoch == self.max_epochs:
                 y2 = minitorch.tensor(data.y)
                 correct = int(((out.detach() > 0.5) == y2).sum()[0])
-                log_fn(epoch, total_loss, correct, losses)
+                avg = sum(epoch_times) / len(epoch_times)
+                log_fn(epoch, total_loss, correct, losses, epoch_time=dt)
 
 
 if __name__ == "__main__":
-    PTS = 50
-    HIDDEN = 2
+    PTS = 100
+    HIDDEN = 20
     RATE = 0.5
-    data = minitorch.datasets["Simple"](PTS)
-    TensorTrain(HIDDEN).train(data, RATE)
+    EPOCHS = 1500
+    data = minitorch.datasets["Spiral"](PTS)
+    TensorTrain(HIDDEN).train(data, RATE, max_epochs=EPOCHS)
